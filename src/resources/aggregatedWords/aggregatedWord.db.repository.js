@@ -39,6 +39,9 @@ const pipeline = [
       'userWord.userId',
       'userWord.__v'
     ]
+  },
+  {
+    $addFields: { id: '$_id' } // for compatibility with Mongoose virtuals
   }
 ];
 
