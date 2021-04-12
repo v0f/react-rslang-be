@@ -81,6 +81,54 @@ const getAll = async (userId, group, page, perPage, filter) => {
   return Word.aggregate([lookup, ...pipeline, ...matches]);
 };
 
+const getWordsCounts = async (userId, group) => {
+  lookup.$lookup.pipeline[0].$match.$expr.$and[0].$eq[1] = mongoose.Types.ObjectId(
+    userId
+  );
+
+  const matches = [];
+
+  if (group || group === 0) {
+    matches.push({
+      $match: {
+        group
+      }
+    });
+  }
+
+  const facet = {
+    $facet: {
+      difficultCount: [
+        {
+          $match: {
+            $and: [
+              { 'userWord.difficulty': 'difficult' },
+              { 'userWord.optional.isDeleted': { $ne: true } }
+            ]
+          }
+        },
+        { $count: 'count' }
+      ],
+      deletedCount: [
+        { $match: { 'userWord.optional.isDeleted': true } },
+        { $count: 'count' }
+      ],
+      learningCount: [
+        {
+          $match: {
+            $and: [
+              { userWord: { $exists: true } },
+              { 'userWord.optional.isDeleted': { $ne: true } }
+            ]
+          }
+        },
+        { $count: 'count' }
+      ]
+    }
+  };
+  return Word.aggregate([lookup, ...pipeline, ...matches, facet]);
+};
+
 const get = async (wordId, userId) => {
   lookup.$lookup.pipeline[0].$match.$expr.$and[0].$eq[1] = mongoose.Types.ObjectId(
     userId
@@ -100,4 +148,4 @@ const get = async (wordId, userId) => {
   return userWord;
 };
 
-module.exports = { getAll, get };
+module.exports = { getAll, get, getWordsCounts };

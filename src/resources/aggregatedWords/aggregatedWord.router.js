@@ -30,6 +30,22 @@ router.get('/', async (req, res) => {
   res.status(OK).send(words);
 });
 
+router.get('/stat', async (req, res) => {
+  const group = extractQueryParam(req.query.group);
+
+  if (req.query.group && isNaN(group)) {
+    throw new BAD_REQUEST_ERROR(
+      'Wrong query parameters: the group, page and words-per-page numbers should be valid integers'
+    );
+  }
+
+  const wordsCounts = await aggregatedWordsService.getWordsCounts(
+    req.userId,
+    group
+  );
+  res.status(OK).send(wordsCounts);
+});
+
 router.get('/:wordId', validator(wordId, 'params'), async (req, res) => {
   const word = await aggregatedWordsService.get(req.params.wordId, req.userId);
 
