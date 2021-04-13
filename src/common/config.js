@@ -15,7 +15,7 @@ module.exports = {
   MIN_PASSWORD_LENGTH: 8,
   LOGS_DIR: path.join(__dirname, '../../logs'),
   JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
-  JWT_EXPIRE_TIME: '4h',
+  JWT_EXPIRE_TIME: '10d',
   JWT_REFRESH_SECRET_KEY: process.env.JWT_REFRESH_SECRET_KEY,
-  JWT_REFRESH_EXPIRE_TIME: 4.5 * 60 * 60
+  JWT_REFRESH_EXPIRE_TIME: 30 * 24 * 60 * 60
 };
