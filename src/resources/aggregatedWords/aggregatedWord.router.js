@@ -46,6 +46,24 @@ router.get('/stat', async (req, res) => {
   res.status(OK).send(wordsCounts);
 });
 
+router.get('/forTextbook', async (req, res) => {
+  const group = extractQueryParam(req.query.group);
+  const page = extractQueryParam(req.query.page);
+
+  if (req.query.group && isNaN(group)) {
+    throw new BAD_REQUEST_ERROR(
+      'Wrong query parameters: the group, page and words-per-page numbers should be valid integers'
+    );
+  }
+
+  const words = await aggregatedWordsService.getUserWordsForTextbook(
+    req.userId,
+    group,
+    page
+  );
+  res.status(OK).send(words);
+});
+
 router.get('/:wordId', validator(wordId, 'params'), async (req, res) => {
   const word = await aggregatedWordsService.get(req.params.wordId, req.userId);
 

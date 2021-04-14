@@ -129,6 +129,31 @@ const getWordsCounts = async (userId, group) => {
   return Word.aggregate([lookup, ...pipeline, ...matches, facet]);
 };
 
+const getUserWordsForTextbook = async (userId, group, page) => {
+  lookup.$lookup.pipeline[0].$match.$expr.$and[0].$eq[1] = mongoose.Types.ObjectId(
+    userId
+  );
+
+  const matches = [];
+
+  matches.push({
+    $match: {
+      'userWord.optional.isDeleted': { $ne: true }
+    }
+  });
+
+  const facet = {
+    $facet: {
+      words: [{ $match: { group, page } }],
+      pagination: [
+        { $group: { _id: '$page', page: { $first: '$page' } } },
+        { $sort: { page: 1 } }
+      ]
+    }
+  };
+  return Word.aggregate([lookup, ...pipeline, ...matches, facet]);
+};
+
 const get = async (wordId, userId) => {
   lookup.$lookup.pipeline[0].$match.$expr.$and[0].$eq[1] = mongoose.Types.ObjectId(
     userId
@@ -148,4 +173,4 @@ const get = async (wordId, userId) => {
   return userWord;
 };
 
-module.exports = { getAll, get, getWordsCounts };
+module.exports = { getAll, get, getWordsCounts, getUserWordsForTextbook };
